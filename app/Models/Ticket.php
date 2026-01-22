@@ -42,7 +42,7 @@ class Ticket extends Model
         'feature_request',
         'network_issue',
         'hardware_failure',
-        'sytem_error',
+        'system_error',
         'performance_issue',
     ];
 
@@ -76,24 +76,26 @@ class Ticket extends Model
         'feature_request',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function ($model) {
-            $year = Carbon::now()->year;
+    //     static::creating(function ($model) {
+    //         $year = Carbon::now()->year;
 
-            $last = self::whereYear('created_at', $year)
-                ->orderBy('id', 'desc')
-                ->first();
+    //         $last = self::whereYear('created_at', $year)
+    //             ->orderBy('id', 'desc')
+    //             ->first();
                 
-            $number = 1;
-            if ($last) {
-                $number = (int) substr($last->id, -4) + 1;
-            }
+    //         $number = 1;
+    //         if ($last) {
+    //             $number = (int) substr($last->id, -4) + 1;
+    //         }
 
-            $model->id = 'TKT-' . $year . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
-        });
-    }
+    //         $model->id = 'TKT-' . $year . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+    //     });
+    // }
+
+    
 
 }

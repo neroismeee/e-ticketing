@@ -13,6 +13,9 @@ Route::get('/user', function (Request $request) {
 //ticket routes
 Route::get('/tickets', [TicketController::class, 'index']);
 Route::get('/tickets/{id}', [TicketController::class, 'show']);
+Route::post('/tickets', [TicketController::class, 'store']);
+Route::put('/tickets/{id}', [TicketController::class, 'update']);
+Route::delete('/tickets/{id}', [TicketController::class, 'destroy']);
 
 //error report routes
 Route::get('/error-reports', [ErrorController::class, 'index']);

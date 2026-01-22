@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Ticket;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class TicketRequest extends FormRequest
 {
@@ -12,7 +14,7 @@ class TicketRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -30,9 +32,9 @@ class TicketRequest extends FormRequest
             'status' => 'required|string|in:' . implode(',', Ticket::STATUSES),
             'reporter_id' => 'required|integer',
             'assigned_to_id' => 'nullable|integer',
-            'assigned_team' => 'nullable|string|max:255' . implode(',', Ticket::ASSIGNED_TEAMS),
+            'assigned_team' => 'nullable|string|max:255|in:' . implode(',', Ticket::ASSIGNED_TEAMS),
             'date_reported' => 'required|date',
-            'due_date' => 'nullable|date', 
+            'due_date' => 'nullable|date',
             'resolved_date' => 'nullable|date',
             'closed_date' => 'nullable|date',
             'sla_breached' => 'required|boolean',
@@ -46,5 +48,27 @@ class TicketRequest extends FormRequest
             'converted_at' => 'nullable|date',
             'conversion_reason' => 'nullable|string|max:255',
         ];
+    }
+
+    public function messages()
+    {
+        return [
+            'category.in' => 'The selected category is invalid.',
+            'priority.in' => 'The selected priority is invalid.',
+            'status.in' => 'The selected status is invalid.',
+            'assigned_team.in' => 'The selected assigned team is invalid.',
+            'converted_to_type.in' => 'The selected converted to type is invalid.',
+        ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json([
+                'status' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422)
+        );
     }
 }

@@ -29,5 +29,30 @@ class ErrorReport extends Model
         'source_ticket_id',
         'is_direct_input',
     ];
+    
+    public const CATEGORIES = [
+        'hardware',
+        'network',
+        'software',
+    ];
 
+    public const PRIORITIES = [
+        'low',
+        'medium',
+        'high',
+        'critical',
+    ];
+
+    public const STATUSES = [
+        'pending_approval',
+        'in_progress',
+        'completed',
+        'overdue',
+    ];
+    
+    public const TEAMS = [
+        'programmer',
+        'network',
+        'hardware',
+    ];
 }

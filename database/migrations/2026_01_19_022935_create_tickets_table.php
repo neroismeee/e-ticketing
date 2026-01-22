@@ -34,6 +34,7 @@ return new class extends Migration
                 $table->string('converted_to_type')->nullable();
                 $table->string('converted_to_id')->nullable();
                 $table->timestamp('converted_at')->nullable();
+                $table->string('converted_by')->nullable();
                 $table->text('conversion_reason')->nullable();
                 $table->timestamps();
             });

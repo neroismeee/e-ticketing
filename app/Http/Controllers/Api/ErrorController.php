@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\ErrorReport;
 use Illuminate\Http\Request;
-
+use App\Http\Requests\ErrorRequest;
 class ErrorController extends Controller
 {
     /**
@@ -13,22 +13,27 @@ class ErrorController extends Controller
      */
     public function index()
     {
-        {
-        $data = ErrorReport::orderBy('created_at', 'desc')->get();
+        $data = ErrorReport::latest()->get();
         return response()->json([
             'status' => true,
             'message' => 'List of Error Reports',
             'data' => $data
         ], 200);
     }
-    }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ErrorRequest $request)
     {
-        //
+        $data = $request->validated();
+
+        $errorReport = ErrorReport::create($data);
+        return response()->json([
+            'status' => true,
+            'message' => 'Error Report Created Successfully',
+            'data' => $errorReport
+        ], 201);
     }
 
     /**
@@ -36,7 +41,8 @@ class ErrorController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $data = ErrorReport::findorFail($id);
+        return response()->json($data, 200);
     }
 
     /**
@@ -44,7 +50,13 @@ class ErrorController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $data = ErrorReport::findOrFail($id);
+        $data->update($request->all());
+        return response()->json([
+            'status' => true,
+            'message' => 'Error Report Updated Successfully',
+            'data' => $data
+        ], 200);
     }
 
     /**
@@ -52,6 +64,11 @@ class ErrorController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $data = ErrorReport::findOrFail($id);
+        $data->delete();
+        return response()->json([
+            'status' => true,
+            'message' => 'Error Report Deleted Successfully',
+        ], 200);
     }
 }

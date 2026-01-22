@@ -40,7 +40,7 @@ return new class extends Migration
             $table->text('rejection_reason')->nullable();
             $table->text('roi_impact')->nullable();
             $table->text('quality_impact')->nullable();
-            $table->text('post_implementation_review')->nullable();
+            $table->text('post_implementation_notes')->nullable();
             $table->string('source_ticket_id')->nullable();
             $table->boolean('is_direct_input')->default(false)->nullable();
             $table->timestamps();

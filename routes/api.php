@@ -20,6 +20,9 @@ Route::delete('/tickets/{id}', [TicketController::class, 'destroy']);
 //error report routes
 Route::get('/error-reports', [ErrorController::class, 'index']);
 Route::get('/error-reports/{id}', [ErrorController::class, 'show']);
+Route::post('/error-reports', [ErrorController::class, 'store']);
+Route::put('/error-reports/{id}', [ErrorController::class, 'update']);
+Route::delete('/error-reports/{id}', [ErrorController::class, 'destroy']);
 
 //feature request routes
 Route::get('/feature-requests', [FeatureController::class, 'index']);

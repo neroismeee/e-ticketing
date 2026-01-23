@@ -27,3 +27,6 @@ Route::delete('/error-reports/{id}', [ErrorController::class, 'destroy']);
 //feature request routes
 Route::get('/feature-requests', [FeatureController::class, 'index']);
 Route::get('/feature-requests/{id}', [FeatureController::class, 'show']);
+Route::post('/feature-requests', [FeatureController::class, 'store']);
+Route::put('/feature-requests/{id}', [FeatureController::class, 'update']);
+Route::delete('/feature-requests/{id}', [FeatureController::class, 'destroy']);

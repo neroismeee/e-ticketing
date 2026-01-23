@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FeatureRequest as RequestsFeatureRequest;
 use App\Models\FeatureRequest;
 use Illuminate\Http\Request;
 
@@ -24,9 +25,16 @@ class FeatureController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(RequestsFeatureRequest $request)
     {
-        //
+        $data = $request->validated();
+
+        $featureRequest = FeatureRequest::create($data);    
+        return response()->json([
+            'status' => true,
+            'message' => 'Feature Request Created Successfully',
+            'data' => $featureRequest
+        ], 201);
     }
 
     /**
@@ -34,7 +42,8 @@ class FeatureController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $data = FeatureRequest::findOrFail($id);
+        return response()->json($data, 200);
     }
 
     /**
@@ -42,7 +51,13 @@ class FeatureController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $data = FeatureRequest::findOrFail($id);
+        $data->update($request->all());
+        return response()->json([
+            'status' => true,
+            'message' => 'Feature Request Updated Successfully',
+            'data' => $data
+        ], 200);
     }
 
     /**
@@ -50,6 +65,11 @@ class FeatureController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $data = FeatureRequest::findOrFail($id);
+        $data->delete();
+        return response()->json([
+            'status' => true,
+            'message' => 'Feature Request Deleted Successfully',
+        ], 200);
     }
 }

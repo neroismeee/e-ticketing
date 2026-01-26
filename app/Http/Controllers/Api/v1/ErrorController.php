@@ -43,14 +43,14 @@ class ErrorController extends Controller
      */
     public function show(string $id)
     {
-        $data = ErrorReport::findorFail($id);
+        $data = ErrorReport::findOrFail($id);
         return response()->json($data, 200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(ErrorRequest $request, string $id)
     {
         $data = ErrorReport::findOrFail($id);
         $data->update($request->all());

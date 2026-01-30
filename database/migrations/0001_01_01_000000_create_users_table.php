@@ -15,10 +15,21 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->nullable();
+            $table->string('team')->nullable();
+            $table->string('avatar')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('last_login')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->boolean('pref_dark_mode')->default(false);
+            $table->boolean('pref_email_notifications')->default(true);
+            $table->boolean('pref_sla_alerts')->default(true);
+            $table->boolean('pref_downtime_alerts')->default(true);
+            $table->string('pref_digest_frequency')->default('immediate');
+            $table->string('pref_quiet_hours')->nullable();
             $table->rememberToken();
-            $table->timestamps();
         });
 
     }

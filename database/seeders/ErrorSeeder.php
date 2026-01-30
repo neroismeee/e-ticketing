@@ -3,8 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\ErrorReport;
-use Error;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Faker\Factory as FakerFactory;
 

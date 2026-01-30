@@ -4,23 +4,27 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Response;
 
 class LoginController extends Controller
 {
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): Response
+    public function store(LoginRequest $request): array
     {
         $request->authenticate();
 
         $user = $request->user();
-        $user->createToken('api-token');
+        $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->noContent();
+        return [
+            'user' =>   new UserResource($user),
+            'token' => $token
+        ];
     }
 
     /**

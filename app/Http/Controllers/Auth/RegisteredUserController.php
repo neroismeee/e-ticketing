@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use App\Http\Requests\UserRequest;
-use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
 
 class RegisteredUserController extends Controller
 {
@@ -15,7 +15,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(UserRequest $request): Response
+    public function store(UserRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -23,6 +23,10 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        return response()->noContent();
+        return response()->json([
+            'status' => true,
+            'message' => 'User Registered Successfully',
+            'data' => $user
+        ], 201);
     }
 }

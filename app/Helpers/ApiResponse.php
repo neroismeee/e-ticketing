@@ -15,11 +15,12 @@ class ApiResponse
     ): JsonResponse {
         $response = [
             'success' => true,
+            'code' => $code,
             'message' => $message,
             'data' => $data
         ];
 
-        if ($meta) {
+        if (is_null($meta)) {
             $response['meta'] = $meta;
         }
 
@@ -28,7 +29,7 @@ class ApiResponse
 
     public static function paginated(
         LengthAwarePaginator $paginator,
-        $resource,
+        mixed $resource,
         string $message = 'Data Retrieved Successfully'
     ): JsonResponse {
         return response()->json([
@@ -39,7 +40,10 @@ class ApiResponse
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),
                 'per_page' => $paginator->perPage(),
-                'total' => $paginator->total()
+                'total' => $paginator->total(),
+                'from' => $paginator->firstItem(),
+                'to' => $paginator->lastItem(),
+                'has_more_page' => $paginator->hasMorePages()
             ],
         ], 200);
     }

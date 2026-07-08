@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\FeatureRequest;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\TagResource;
 
-class FeatureResource extends JsonResource
+class FeatureRequestResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,10 +18,9 @@ class FeatureResource extends JsonResource
         return ([
             'id' => $this->id,
             'title' => $this->title,
-            'request_type' => $this->request_type,
-            'priority' => $this->priority,
-            'status' => $this->status,
-            'progress' => $this->progress,
+            'request_type' => $this->request_type->label(),
+            'priority' => $this->priority->label(),
+            'status' => $this->status->label(),
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
         ]);

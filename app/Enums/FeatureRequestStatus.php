@@ -51,13 +51,13 @@ enum FeatureRequestStatus: string
         ];
     }
 
-    public function isFinal(): bool
+    public static function terminalStatuses(): array
     {
-        return in_array($this, [
+        return [
             self::Completed,
-            self::PostImplementationReview,
             self::Rejected,
-            self::Cancelled
-        ]);
+            self::Cancelled,
+        ];
     }
+
 }

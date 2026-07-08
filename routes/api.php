@@ -13,7 +13,6 @@ use App\Http\Controllers\Api\v1\Comment\MentionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\TicketController;
-use App\Http\Controllers\Api\v1\FeatureController;
 use App\Http\Controllers\Api\v1\TIcketConversionController;
 use App\Http\Controllers\Api\v1\Comment\TicketCommentController;
 use App\Http\Controllers\Api\v1\Comment\FeatureRequestCommentController;
@@ -21,7 +20,10 @@ use App\Http\Controllers\Api\v1\Comment\ErrorReportCommentController;
 use App\Http\Controllers\Api\v1\ConversionHistoryController;
 use App\Http\Controllers\Api\v1\DowntimeAffectedSystemController;
 use App\Http\Controllers\Api\v1\DowntimeRecordController;
+use App\Http\Controllers\Api\v1\ErrorReport\ErrorReportWorkController;
 use App\Http\Controllers\Api\v1\ErrorReportController;
+use App\Http\Controllers\Api\v1\FeatureRequest\FeatureRequestWorkController;
+use App\Http\Controllers\Api\v1\FeatureRequestController;
 use App\Http\Controllers\Api\v1\MilestoneController;
 use App\Http\Controllers\Api\v1\NotificationController;
 use App\Http\Controllers\Api\v1\StatusHistory\ErrorReportStatusHistoryController;
@@ -58,8 +60,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/error-reports/{error}', [ErrorReportController::class, 'show'])->name('error-reports.show');
 
             //feature request routes
-            Route::get('/feature-requests', [FeatureController::class, 'index'])->name('feature-requests.index');
-            Route::get('/feature-requests/{feature}', [FeatureController::class, 'show'])->name('feature-requests.show');
+            Route::get('/feature-requests', [FeatureRequestController::class, 'index'])->name('feature-requests.index');
+            Route::get('/feature-requests/{feature}', [FeatureRequestController::class, 'show'])->name('feature-requests.show');
 
             //comment routes
             Route::apiResource('tickets.comments', TicketCommentController::class)->only(['index', 'store', 'destroy']);
@@ -173,11 +175,15 @@ Route::prefix('v1')->group(function () {
             Route::post('/error-reports', [ErrorReportController::class, 'store'])->name('error-reports.store');
             Route::put('/error-reports/{error}', [ErrorReportController::class, 'update'])->name('error-reports.update');
             Route::delete('/error-reports/{error}', [ErrorReportController::class, 'destroy'])->name('error-reports.delete');
+            // Route::patch('/error-reports/{error}/start', [ErrorReportWorkController::class, 'start']);
+            // Route::patch('/error-reports/{error}/resolve', [ErrorReportWorkController::class, 'resolve']);
 
             //feature request routes
-            Route::post('/feature-requests', [FeatureController::class, 'store'])->name('feature-requests.store');
-            Route::put('/feature-requests/{feature}', [FeatureController::class, 'update'])->name('feature-requests.update');
-            Route::delete('/feature-requests/{feature}', [FeatureController::class, 'destroy'])->name('feature-requests.delete');
+            Route::post('/feature-requests', [FeatureRequestController::class, 'store'])->name('feature-requests.store');
+            Route::put('/feature-requests/{feature}', [FeatureRequestController::class, 'update'])->name('feature-requests.update');
+            Route::delete('/feature-requests/{feature}', [FeatureRequestController::class, 'destroy'])->name('feature-requests.delete');
+            // Route::patch('/feature-requests/{feature}/start', [FeatureRequestWorkController::class, 'start']);
+            // Route::patch('/feature-requests/{feature}/resolve', [FeatureRequestWorkController::class, 'resolve']);
 
             //status history routes
             Route::patch('/tickets/{ticket}/status', [TicketStatusHistoryController::class, 'update']);

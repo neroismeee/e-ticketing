@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\ApprovalStatus;
 use App\Enums\AssignedTeam;
 use App\Enums\FeatureRequestStatus;
 use App\Enums\Priorities;
@@ -17,6 +16,7 @@ use App\Traits\HasStatusHistory;
 use App\Traits\HasTags;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -44,7 +44,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
     'sla_time_elapsed',
     'sla_time_remaining',
     'sla_breached',
-    'approval_status',
     'approved_by',
     'rejection_reason',
     'roi_impact',
@@ -63,14 +62,23 @@ class FeatureRequest extends Model
     public $incrementing = false;
 
     protected $casts = [
+        'priority' => Priorities::class,
         'status' => FeatureRequestStatus::class,
         'assigned_team' => AssignedTeam::class,
-        'priority' => Priorities::class,
         'request_type' => RequestType::class,
-        'approval_status' => ApprovalStatus::class,
+        'progress' => 'integer',
         'approval_date' => 'datetime',
         'assignment_date' => 'datetime',
-        'date_reported' => 'datetime'
+        'start_date' => 'datetime',
+        'due_date' => 'datetime',
+        'completion_date' => 'datetime',
+        'review_date' => 'datetime',
+        'estimated_effort' => 'decimal:2',
+        'actual_effort' => 'decimal:2',
+        'sla_time_elapsed' => 'decimal:2',
+        'sla_time_remaining' => 'decimal:2',
+        'sla_breached' => 'boolean',
+        'is_direct_input' => 'boolean',
     ];
 
     // Relations
@@ -79,7 +87,7 @@ class FeatureRequest extends Model
         return $this->belongsTo(User::class, 'reporter_id');
     }
 
-    public function assignee()
+    public function assignedUser()
     {
         return $this->belongsTo(User::class, 'assigned_to_id');
     }
@@ -132,6 +140,40 @@ class FeatureRequest extends Model
     }
 
     // Helpers
+    public function isAssignedToUser(): bool
+    {
+        return ! is_null($this->assigned_to_id);
+    }
+
+    public function isAssignedToTeam(): bool
+    {
+        return ! is_null($this->assigned_team);
+    }
+
+    public function isAssignable(): bool
+    {
+        $currentStatus = $this->status->value;
+
+        return in_array($currentStatus, FeatureRequestStatus::assignableStatuses());
+    }
+
+    public function isTerminal(): bool
+    {
+        $currentStatus = $this->status->value;
+
+        return in_array($currentStatus, FeatureRequestStatus::terminalStatuses());
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === FeatureRequestStatus::Completed;
+    }
+
+    public function isFromTicket(): bool
+    {
+        return ! is_null($this->source_ticket_id);
+    }
+
     public function calculateOverallProgress(): int
     {
         $milestones = $this->milestones;
@@ -142,15 +184,42 @@ class FeatureRequest extends Model
 
         return (int) $milestones->avg('progress');
     }
-    
-    public function calculateTimelineProgress(): int
+
+    // Scopes
+    public function scopeByStatus(Builder $query, string $status): Builder
     {
-        $entries = $this->timelineEntries;
+        return $query->where('status', $status);
+    }
 
-        if ($entries->isEmpty()) {
-            return 0;
-        }
+    public function scopeByPriority(Builder $query, string $priority): Builder
+    {
+        return $query->where('priority', $priority);
+    }
 
-        return (int) $entries->avg('progress');
+    public function scopeByRequestType(Builder $query, string $type): Builder
+    {
+        return $query->where('request_type', $type);
+    }
+
+    public function scopeSlaBreached(Builder $query): Builder
+    {
+        return $query->where('sla_breached', true);
+    }
+
+    public function scopeDirectInput(Builder $query): Builder
+    {
+        return $query->where('is_direct_input', true);
+    }
+
+    public function scopeFromTicket(Builder $query): Builder
+    {
+        return $query->whereNotNull('source_ticket_id');
+    }
+
+    public function scopeOverdue(Builder $query): Builder
+    {
+        return $query->whereNotNull('due_date')
+            ->where('due_date', '<', now())
+            ->whereNotIn('status', FeatureRequestStatus::terminalStatuses());
     }
 }

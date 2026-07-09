@@ -23,8 +23,8 @@ return new class extends Migration
                 ->onUpdate('cascade')
                 ->nullOnDelete();   
             $table->timestamp('changed_at')->useCurrent();
-            $table->text('reason');
-            $table->text('notes');
+            $table->text('reason')->nullable();
+            $table->text('notes')->nullable();
 
             $table->index(['statusable_id', 'statusable_type']);
             $table->index('changed_at');

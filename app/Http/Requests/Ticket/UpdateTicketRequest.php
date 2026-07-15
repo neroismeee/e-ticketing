@@ -2,13 +2,10 @@
 
 namespace App\Http\Requests\Ticket;
 
-use App\Enums\AssignedTeam;
-use App\Enums\ConversionTypes;
 use App\Enums\Priorities;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Enums\TicketCategory;
-use App\Enums\TicketStatus;
 use Illuminate\Support\Str;
 
 class UpdateTicketRequest extends FormRequest
@@ -41,7 +38,7 @@ class UpdateTicketRequest extends FormRequest
             'title' => ['sometimes', 'string', 'max:255'],
             'description' => ['sometimes', 'string'],
             'category' => ['sometimes', 'string', Rule::in(TicketCategory::values())],  
-            'priority' => ['sometimes', 'string', Rule::in(Priorities::values())],  
+            'priority' => ['sometimes', 'string', Rule::in(Priorities::values())],
             'due_date' => ['nullable', 'date'],
             'estimated_effort' => ['nullable', 'numeric', 'decimal:0,2'],
             'actual_effort' => ['nullable', 'numeric', 'decimal:0,2'],

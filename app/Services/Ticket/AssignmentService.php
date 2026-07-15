@@ -17,9 +17,6 @@ use App\Models\Ticket;
 use App\Models\User;
 use App\Services\NotificationService;
 use Illuminate\Validation\ValidationException;
-use BackedEnum;
-use App\Enums\Priorities;
-use Illuminate\Support\Carbon;
 
 class AssignmentService
 {
@@ -43,16 +40,13 @@ class AssignmentService
             ]);
         }
         $previousAssignee = $resource->assignedUser?->name;
-        $previousStatus = $resource->status instanceof \BackedEnum
-            ? $resource->status->value
-            : $resource->status;
+        $previousStatus = $resource->status->value;
 
         DB::transaction(function () use ($resource, $user, $previousAssignee, $previousStatus) {
             $resource->update([
                 'assigned_to_id' => $user->id,
                 'assignment_date' => now(),
                 'status' => $this->resolveStatusAfterAssignment($resource),
-                'due_date' => $this->calculateDueDate($resource->priority->value, now()),
             ]);
 
             $description = $previousAssignee
@@ -99,9 +93,7 @@ class AssignmentService
 
         $assignedTeam = AssignedTeam::from($team);
 
-        $currentTeam = $resource->assigned_team instanceof AssignedTeam
-            ? $resource->assigned_team->value
-            : $resource->assigned_team;
+        $currentTeam = $resource->assigned_team?->value;
 
         if ($currentTeam === $assignedTeam->value) {
             throw ValidationException::withMessages([
@@ -111,21 +103,14 @@ class AssignmentService
             ]);
         }
 
-
-        $previousTeamLabel = $resource->assigned_team instanceof AssignedTeam
-            ? $resource->assigned_team->label()
-            : $resource->assigned_team;
-
-        $previousStatus = $resource->status instanceof BackedEnum
-            ? $resource->status->value
-            : $resource->status;
+        $previousTeamLabel = $resource->assigned_team?->label();
+        $previousStatus = $resource->status->value;
 
         DB::transaction(function () use ($resource, $assignedTeam, $previousTeamLabel, $previousStatus) {
             $resource->update([
                 'assigned_team' => $assignedTeam->value,
                 'assignment_date' => now(),
                 'status' => $this->resolveStatusAfterAssignment($resource),
-                'due_date' => $this->calculateDueDate($resource->priority->value, now()),
             ]);
 
             $description = $previousTeamLabel
@@ -202,9 +187,7 @@ class AssignmentService
             ]);
         }
 
-        $previousTeam = $resource->assigned_team instanceof AssignedTeam
-            ? $resource->assigned_team->label()
-            : $resource->assigned_team;
+        $previousTeam = $resource->assigned_team->label();
 
         DB::transaction(function () use ($resource, $previousTeam) {
             $resource->update([
@@ -233,7 +216,7 @@ class AssignmentService
 
         $allowedStatuses = $this->resolveAssignableStatus($resource);
 
-        if (in_array($currentStatus, $allowedStatuses)) {
+        if (! in_array($currentStatus, $allowedStatuses)) {
             throw ValidationException::withMessages([
                 'status' => [
                     "Resource with status '{$currentStatus}' cannot be assigned."
@@ -254,9 +237,7 @@ class AssignmentService
 
     private function resolveStatusAfterAssignment(Model $resource): string
     {
-        $currentStatus = $resource->status instanceof BackedEnum
-            ? $resource->status->value
-            : $resource->status;
+        $currentStatus = $resource->status->value;
 
         $preAssignedStatus = [
             TicketStatus::Draft->value,
@@ -276,8 +257,8 @@ class AssignmentService
     {
         return match (true) {
             $resource instanceof Ticket => TicketStatus::Assigned->value,
-            $resource instanceof FeatureRequest => ErrorReportStatus::Assigned->value,
-            $resource instanceof ErrorReport => FeatureRequestStatus::Assigned->value,
+            $resource instanceof ErrorReport => ErrorReportStatus::Assigned->value,
+            $resource instanceof FeatureRequest => FeatureRequestStatus::Assigned->value,
             default => 'assigned',
         };
     }
@@ -296,11 +277,4 @@ class AssignmentService
         }
     }
 
-    private function calculateDueDate(string $priority, Carbon $assignmentDate): Carbon
-    {
-        $priorityEnum = Priorities::tryFrom($priority);
-        $hours = $priorityEnum ? $priorityEnum->slaHours() : 48;
-
-        return $assignmentDate->copy()->addHours($hours);
-    }
 }

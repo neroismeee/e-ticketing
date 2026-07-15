@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\v1\ActivityLogController;
 use App\Http\Controllers\Api\v1\ApprovalController;
 use App\Http\Controllers\Api\v1\Assignment\ErrorReportAssignmentController;
 use App\Http\Controllers\Api\v1\Assignment\FeatureRequestAssignmentController;
+use App\Http\Controllers\Api\v1\Assignment\TicketAssignmentController;
 use App\Http\Controllers\Api\v1\Attachment\CommentAttachmentController;
 use App\Http\Controllers\Api\v1\Attachment\ErrorReportAttachmentController;
 use App\Http\Controllers\Api\v1\Attachment\FeatureRequestAttachmentController;
@@ -148,6 +149,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/features/{feature}/reject', [ApprovalController::class, 'rejectFeatureRequest'])->name('feature-requests.reject');
             Route::post('/errors/{error}/approve', [ApprovalController::class, 'approveErrorReport'])->name('error-reports.approve');
             Route::post('/errors/{error}/reject', [ApprovalController::class, 'rejectErrorReport'])->name('error-reports.reject');
+
+            //ticket assignment routes
+            Route::post('/tickets/{ticket}/assign/user', [TicketAssignmentController::class, 'assignUser']);
+            Route::post('/tickets/{ticket}/assign/team', [TicketAssignmentController::class, 'assignTeam']);
+            Route::post('/tickets/{ticket}/unassign/user', [TicketAssignmentController::class, 'unassignUser']);
+            Route::post('/tickets/{ticket}/unassign/team', [TicketAssignmentController::class, 'unassignTeam']);
             
             //feature request assignment routes
             Route::post('/features/{feature}/assign/user', [FeatureRequestAssignmentController::class, 'assignUser']);

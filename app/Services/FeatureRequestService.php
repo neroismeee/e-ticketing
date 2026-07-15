@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use App\Enums\FeatureRequestStatus;
-use App\Enums\Priorities;
 use App\Models\FeatureRequest;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -25,7 +23,6 @@ class FeatureRequestService
             'date_submitted' => now(),
             'is_direct_input' => true,
             'source_ticket_id' => null,
-            'due_date' => $data['due_date'] ?? $this->calculateDueDate($data['priority'])
         ]);
 
         return $feature->load(['reporter', 'assignedUser', 'approver', 'tags']);
@@ -136,12 +133,4 @@ class FeatureRequestService
 
         return sprintf('FR-%d-%03d', $year, $nextNumber);
     }
-
-    private function calculateDueDate(string $priority): Carbon
-    {
-        $priorityEnum = Priorities::tryFrom($priority);
-        $hours = $priorityEnum ? $priorityEnum->slaHours() : 48;
-
-        return now()->addHours($hours);
-    } 
 }

@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
-use App\Enums\Priorities;
 use App\Enums\TicketStatus;
 use App\Enums\UserRole;
 use App\Models\Ticket;
+use App\Services\Effort\EffortCalculator;
+use App\Services\Sla\SlaCalculator;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class TicketService
 {
@@ -22,8 +23,6 @@ class TicketService
                 'reporter_id' => Auth::id(),
                 'status' => TicketStatus::Draft->value,
                 'date_reported' => now(),
-                'due_date' => $data['due_date'] ??
-                    $this->calculateDueDate($data['priority'])
             ]);
 
             return $ticket;
@@ -114,11 +113,29 @@ class TicketService
         });
     }
 
-    private function calculateDueDate(string $priority): Carbon
-    {
-        $priorityEnum = Priorities::tryFrom($priority);
-        $hours = $priorityEnum ? $priorityEnum->slaHours() : 48;
+    // Helpers
+    // fungsi untuk sinkronisasi dari error report/feature request 
+    public function syncResolutionFromConvertedResource(
+        string $sourceTicketId,
+        Carbon $completionDate
+    ): void {
+        $ticket = Ticket::findOrFail($sourceTicketId);
 
-        return now()->addHours($hours);
+        if (! $ticket) {
+            return;
+        }
+        
+        $ticket->updateQuietly([
+            'status' => TicketStatus::Resolved,
+            'resolved_date' => $completionDate,
+            'resolution_time' => EffortCalculator::calculateResolutionTime(
+                reportedAt: $ticket->date_reported,
+                resolvedAt: $completionDate
+            ),
+            'sla_breached' => SlaCalculator::isSlaBreached(
+                dueDate: $ticket->due_date,
+                completionTime: $completionDate
+            )
+        ]);
     }
 }

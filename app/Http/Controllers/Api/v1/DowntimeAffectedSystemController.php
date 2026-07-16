@@ -16,9 +16,9 @@ class DowntimeAffectedSystemController extends Controller
         private readonly DowntimeAffectedSystemService $downtimeService
     ) {}
 
-    public function index(DowntimeRecord $downtime): JsonResponse
+    public function index(DowntimeRecord $downtimeRecord): JsonResponse
     {
-        $systems = $this->downtimeService->getSystems($downtime);
+        $systems = $this->downtimeService->getSystems($downtimeRecord);
 
         return ApiResponse::success(
             $systems->pluck('system_name'),
@@ -26,10 +26,10 @@ class DowntimeAffectedSystemController extends Controller
         );
     } 
 
-    public function store(StoreDowntimeAffectedSystemRequest $request, DowntimeRecord $downtime): JsonResponse
+    public function store(StoreDowntimeAffectedSystemRequest $request, DowntimeRecord $downtimeRecord): JsonResponse
     {
         $systems = $this->downtimeService->addSystems(
-            downtime: $downtime,
+            downtime: $downtimeRecord,
             systemNames: $request->validated('system_names')
         );
 
@@ -40,10 +40,10 @@ class DowntimeAffectedSystemController extends Controller
         );
     }
 
-    public function sync(StoreDowntimeAffectedSystemRequest $request, DowntimeRecord $downtime): JsonResponse
+    public function sync(StoreDowntimeAffectedSystemRequest $request, DowntimeRecord $downtimeRecord): JsonResponse
     {
         $systems = $this->downtimeService->syncSystems(
-            downtime: $downtime,
+            downtime: $downtimeRecord,
             systemNames: $request->validated('system_names')
         );
 
@@ -53,7 +53,7 @@ class DowntimeAffectedSystemController extends Controller
         );
     }
 
-    public function destroy(Request $request, DowntimeRecord $downtime): JsonResponse
+    public function destroy(Request $request, DowntimeRecord $downtimeRecord): JsonResponse
     {
         $validated = $request->validate([
             'system_names' => ['required', 'array', 'min:1'],
@@ -61,7 +61,7 @@ class DowntimeAffectedSystemController extends Controller
         ]);
         
         $systems = $this->downtimeService->removeSystem(
-            downtime: $downtime,
+            downtime: $downtimeRecord,
             systemNames: $validated['system_names']
         );
 

@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\ActivityLogController;
 use App\Http\Controllers\Api\v1\ApprovalController;
 use App\Http\Controllers\Api\v1\Assignment\ErrorReportAssignmentController;
@@ -11,10 +13,8 @@ use App\Http\Controllers\Api\v1\Attachment\FeatureRequestAttachmentController;
 use App\Http\Controllers\Api\v1\Attachment\TicketAttachmentController;
 use App\Http\Controllers\Api\v1\CalendarEventController;
 use App\Http\Controllers\Api\v1\Comment\MentionController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\v1\TicketController;
-use App\Http\Controllers\Api\v1\TIcketConversionController;
+use App\Http\Controllers\Api\v1\TicketConversionController;
 use App\Http\Controllers\Api\v1\Comment\TicketCommentController;
 use App\Http\Controllers\Api\v1\Comment\FeatureRequestCommentController;
 use App\Http\Controllers\Api\v1\Comment\ErrorReportCommentController;
@@ -57,12 +57,12 @@ Route::prefix('v1')->group(function () {
             Route::get('/tickets/{ticket}', [TicketController::class, 'show'])->name('tickets.show');
 
             //error report routes
-            Route::get('/error-reports', [ErrorReportController::class, 'index'])->name('error-reports.index');
-            Route::get('/error-reports/{error}', [ErrorReportController::class, 'show'])->name('error-reports.show');
+            Route::get('/errors', [ErrorReportController::class, 'index'])->name('errors.index');
+            Route::get('/errors/{error}', [ErrorReportController::class, 'show'])->name('errors.show');
 
             //feature request routes
-            Route::get('/feature-requests', [FeatureRequestController::class, 'index'])->name('feature-requests.index');
-            Route::get('/feature-requests/{feature}', [FeatureRequestController::class, 'show'])->name('feature-requests.show');
+            Route::get('/features', [FeatureRequestController::class, 'index'])->name('features.index');
+            Route::get('/features/{feature}', [FeatureRequestController::class, 'show'])->name('features.show');
 
             //comment routes
             Route::apiResource('tickets.comments', TicketCommentController::class)->only(['index', 'store', 'destroy']);
@@ -89,12 +89,12 @@ Route::prefix('v1')->group(function () {
             Route::get('downtime-records/{downtimeRecord}', [DowntimeRecordController::class, 'show']);
 
             //milestone routes
-            Route::get('feature-requests/{feature}/milestones', [MilestoneController::class, 'index']);
-            Route::get('feature-requests/{feature}/milestones/{milestone}', [MilestoneController::class, 'show']);
+            Route::get('features/{feature}/milestones', [MilestoneController::class, 'index']);
+            Route::get('features/{feature}/milestones/{milestone}', [MilestoneController::class, 'show']);
 
             //timeline routes
-            Route::get('feature-requests/{feature}/timelines', [TimelineEntryController::class, 'index']);
-            Route::get('feature-requests/{feature}/timelines/{entry}', [TimelineEntryController::class, 'show']);
+            Route::get('features/{feature}/timelines', [TimelineEntryController::class, 'index']);
+            Route::get('features/{feature}/timelines/{entry}', [TimelineEntryController::class, 'show']);
 
             //tag routes
             Route::get('tags', [TagController::class, 'index']);
@@ -141,14 +141,14 @@ Route::prefix('v1')->group(function () {
             Route::patch('/users/{user}/preferences', [UserController::class, 'updatePreferences']);
         });
 
-        Route::middleware('role:team_lead')->group(function () {
+        Route::middleware('role:it_staff')->group(function () {
             //approval routes
-            Route::post('/tickets/{ticket}/approve', [ApprovalController::class, 'approveTicket'])->name('tickets.approve');
-            Route::post('/tickets/{ticket}/reject', [ApprovalController::class, 'rejectTicket'])->name('tickets.reject');
-            Route::post('/features/{feature}/approve', [ApprovalController::class, 'approveFeatureRequest'])->name('feature-request.approve');
-            Route::post('/features/{feature}/reject', [ApprovalController::class, 'rejectFeatureRequest'])->name('feature-requests.reject');
-            Route::post('/errors/{error}/approve', [ApprovalController::class, 'approveErrorReport'])->name('error-reports.approve');
-            Route::post('/errors/{error}/reject', [ApprovalController::class, 'rejectErrorReport'])->name('error-reports.reject');
+            Route::patch('/tickets/{ticket}/approve', [ApprovalController::class, 'approveTicket'])->name('tickets.approve');
+            Route::patch('/tickets/{ticket}/reject', [ApprovalController::class, 'rejectTicket'])->name('tickets.reject');
+            Route::patch('/features/{feature}/approve', [ApprovalController::class, 'approveFeatureRequest'])->name('feature-request.approve');
+            Route::patch('/features/{feature}/reject', [ApprovalController::class, 'rejectFeatureRequest'])->name('features.reject');
+            Route::patch('/errors/{error}/approve', [ApprovalController::class, 'approveErrorReport'])->name('errors.approve');
+            Route::patch('/errors/{error}/reject', [ApprovalController::class, 'rejectErrorReport'])->name('errors.reject');
 
             //ticket assignment routes
             Route::post('/tickets/{ticket}/assign/user', [TicketAssignmentController::class, 'assignUser']);
@@ -179,18 +179,19 @@ Route::prefix('v1')->group(function () {
                 ->name('tickets.convert.feature-request');
 
             //error report routes
-            Route::post('/error-reports', [ErrorReportController::class, 'store'])->name('error-reports.store');
-            Route::put('/error-reports/{error}', [ErrorReportController::class, 'update'])->name('error-reports.update');
-            Route::delete('/error-reports/{error}', [ErrorReportController::class, 'destroy'])->name('error-reports.delete');
-            // Route::patch('/error-reports/{error}/start', [ErrorReportWorkController::class, 'start']);
-            // Route::patch('/error-reports/{error}/resolve', [ErrorReportWorkController::class, 'resolve']);
+            Route::post('/errors', [ErrorReportController::class, 'store'])->name('errors.store');
+            Route::put('/errors/{error}', [ErrorReportController::class, 'update'])->name('errors.update');
+            Route::delete('/errors/{error}', [ErrorReportController::class, 'destroy'])->name('errors.delete');
+            Route::patch('/errors/{error}/start', [ErrorReportWorkController::class, 'startWork']);
+            Route::patch('/errors/{error}/resolve', [ErrorReportWorkController::class, 'resolveWork']);
 
             //feature request routes
-            Route::post('/feature-requests', [FeatureRequestController::class, 'store'])->name('feature-requests.store');
-            Route::put('/feature-requests/{feature}', [FeatureRequestController::class, 'update'])->name('feature-requests.update');
-            Route::delete('/feature-requests/{feature}', [FeatureRequestController::class, 'destroy'])->name('feature-requests.delete');
-            // Route::patch('/feature-requests/{feature}/start', [FeatureRequestWorkController::class, 'start']);
-            // Route::patch('/feature-requests/{feature}/resolve', [FeatureRequestWorkController::class, 'resolve']);
+            Route::post('/features', [FeatureRequestController::class, 'store'])->name('features.store');
+            Route::put('/features/{feature}', [FeatureRequestController::class, 'update'])->name('features.update');
+            Route::delete('/features/{feature}', [FeatureRequestController::class, 'destroy'])->name('features.delete');
+            Route::patch('/features/{feature}/start', [FeatureRequestWorkController::class, 'startWork']);
+            Route::patch('/features/{feature}/resolve', [FeatureRequestWorkController::class, 'resolveWork']);
+            Route::patch('/features/{feature}/closed', [FeatureRequestWorkController::class, 'closeWork']);
 
             //status history routes
             Route::patch('/tickets/{ticket}/status', [TicketStatusHistoryController::class, 'update']);
@@ -209,18 +210,18 @@ Route::prefix('v1')->group(function () {
             Route::delete('downtime-records/{downtimeRecord}', [DowntimeRecordController::class, 'destroy']);
 
             //milestone routes
-            Route::post('feature-requests/{feature}/milestones', [MilestoneController::class, 'store']);
-            Route::put('feature-requests/{feature}/milestones/{milestone}', [MilestoneController::class, 'update']);
-            Route::patch('feature-requests/{feature}/milestones/{milestone}/progress', [MilestoneController::class, 'updateProgress']);
-            Route::patch('feature-requests/{feature}/milestones/{milestone}/complete', [MilestoneController::class, 'complete']);
-            Route::delete('feature-requests/{feature}/milestones/{milestone}', [MilestoneController::class, 'destroy']);
+            Route::post('features/{feature}/milestones', [MilestoneController::class, 'store']);
+            Route::put('features/{feature}/milestones/{milestone}', [MilestoneController::class, 'update']);
+            Route::patch('features/{feature}/milestones/{milestone}/progress', [MilestoneController::class, 'updateProgress']);
+            Route::patch('features/{feature}/milestones/{milestone}/complete', [MilestoneController::class, 'complete']);
+            Route::delete('features/{feature}/milestones/{milestone}', [MilestoneController::class, 'destroy']);
 
             //timeline routes
-            Route::post('feature-requests/{feature}/timelines', [TimelineEntryController::class, 'store']);
-            Route::put('feature-requests/{feature}/timelines/{entry}', [TimelineEntryController::class, 'update']);
-            Route::patch('feature-requests/{feature}/timelines/{entry}/progress', [TimelineEntryController::class, 'updateProgress']);
-            Route::patch('feature-requests/{feature}/timelines/{entry}/complete', [TimelineEntryController::class, 'complete']);
-            Route::delete('feature-requests/{feature}/timelines/{entry}', [TimelineEntryController::class, 'destroy']);
+            Route::post('features/{feature}/timelines', [TimelineEntryController::class, 'store']);
+            Route::put('features/{feature}/timelines/{entry}', [TimelineEntryController::class, 'update']);
+            Route::patch('features/{feature}/timelines/{entry}/progress', [TimelineEntryController::class, 'updateProgress']);
+            Route::patch('features/{feature}/timelines/{entry}/complete', [TimelineEntryController::class, 'complete']);
+            Route::delete('features/{feature}/timelines/{entry}', [TimelineEntryController::class, 'destroy']);
 
             //tag routes
             Route::post('tags', [TagController::class, 'store']);
@@ -239,14 +240,14 @@ Route::prefix('v1')->group(function () {
             Route::delete('tickets/{ticket}/merge/{mergedTicketId}', [MergedTicketController::class, 'unmergeTicket']);
 
             //downtime system affected routes
-            Route::get('/downtime-records/{downtime}/affected-systems', [DowntimeAffectedSystemController::class, 'index']);
-            Route::post('/downtime-records/{downtime}/affected-systems', [DowntimeAffectedSystemController::class, 'store']);
-            Route::put('/downtime-records/{downtime}/affected-systems', [DowntimeAffectedSystemController::class, 'sync']);
-            Route::delete('/downtime-records/{downtime}/affected-systems', [DowntimeAffectedSystemController::class, 'destroy']);
+            Route::get('/downtime-records/{downtimeRecord}/affected-systems', [DowntimeAffectedSystemController::class, 'index']);
+            Route::post('/downtime-records/{downtimeRecord}/affected-systems', [DowntimeAffectedSystemController::class, 'store']);
+            Route::put('/downtime-records/{downtimeRecord}/affected-systems', [DowntimeAffectedSystemController::class, 'sync']);
+            Route::delete('/downtime-records/{downtimeRecord}/affected-systems', [DowntimeAffectedSystemController::class, 'destroy']);
 
             //calendar event routes
-            Route::post('/calendar-events/', [CalendarEventController::class, 'store']);
-            Route::post('/calendar-events/{event}', [CalendarEventController::class, 'update']);
+            Route::post('/calendar-events   ', [CalendarEventController::class, 'store']);
+            Route::put  ('/calendar-events/{event}', [CalendarEventController::class, 'update']);
             Route::delete('/calendar-events/{event}', [CalendarEventController::class, 'destroy']);
 
             //system configuration routes
